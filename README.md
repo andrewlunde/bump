@@ -29,7 +29,7 @@ Learn more at https://cap.cloud.sap/docs/get-started/
 
 # Build Command:
 ```
-cd bump ; mkdir -p mta_archives ; mbt build -p=cf -t=mta_archives --mtar=bump.mtar
+mkdir -p mta_archives ; mbt build -p=cf -t=mta_archives --mtar=bump.mtar
 ```
 
 # Deploy Command:
