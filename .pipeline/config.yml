@@ -1,0 +1,39 @@
+# https://sap.github.io/jenkins-library/
+general:
+  gitSshKeyCredentialsId: 'andrewlundesso'
+  collectTelemetryData: false
+steps:
+  setupCommonPipelineEnvironment:
+    collectTelemetryData: true
+  mtaBuild:
+    buildTarget: 'CF'
+    mtaBuildTool: 'cloudMbt'
+    platform: 'cf'
+    defaultNpmRegistry: 'https://registry.npmjs.org/'
+    cloudMbt:
+      dockerImage: 'alunde/mbtci:latest'
+    #dockerBasedModules: ['conciletime-cli']
+    #postBuildAction: 'mbt --version'
+  # https://github.wdf.sap.corp/pages/ContinuousDelivery/piper-doc/steps/cloudFoundryDeploy/
+  cloudFoundryDeploy:
+    verbose: true
+    deployTool: 'mtaDeployPlugin'
+    #deployTool: 'cf_native'
+    deployType: 'standard'
+    cloudFoundry:
+      apiEndpoint: 'https://api.cf.us10.hana.ondemand.com'
+      org: 'ConcileTime'
+      space: 'dev'
+      credentialsId: 'andrewlundesso'
+      dockerImage: 'ppiper/cf-cli:latest'
+      dockerWorkspace: '/home/jenkins/piper'
+    mtaDeployParameters: '-f'
+#  xsaDeploy:
+#    XSA:
+#      apiEndpoint: 'https://api.cf.us10.hana.ondemand.com'
+#      org: 'ConcileTime'
+#      space: 'dev'
+#      credentialsId: 'andrewlundesso'
+  slackSendNotification:
+    credentialsId: 'andrewlundeslack'
+    channel: '#jenkins_buildss'

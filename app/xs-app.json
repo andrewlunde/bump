@@ -1,0 +1,27 @@
+{
+  "welcomeFile": "index.html",
+  "authenticationMethod": "route",
+  "logout": {
+    "logoutEndpoint": "/do/logout"
+  },
+  "routes": [
+    {
+      "source": "(util/)(.*)",
+      "destination": "bump_cron_be",
+      "csrfProtection": false,
+      "authenticationType": "none"
+    },
+     {
+      "source": "(cron/)(.*)",
+      "destination": "bump_cron_be",
+      "csrfProtection": true,
+      "authenticationType": "xsuaa"
+    },
+    {
+      "localDir": "resources",
+      "source": "^/(.*)",
+      "authenticationType": "none"
+    }
+  ]
+}
+

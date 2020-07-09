@@ -1,0 +1,43 @@
+{
+  "generator-sap-partner-eng": {
+    "package_version": "0.2.19",
+    "project_name": "bump",
+    "app_name": "bump",
+    "app_desc": "Bump(Trigger) a Jenkins webhook(like Github does) on a schedule.",
+    "router_name": "bump-app",
+    "domain_name": "cfapps.us10.hana.ondemand.com",
+    "router_path": "app",
+    "database_path": "db",
+    "services_path": "srv",
+    "uaa_res_name": "bump-uaa",
+    "uaa_svc_name": "BUMP_UAA",
+    "module_names": [
+      "bump-cron"
+    ],
+    "module_paths": [
+      "cron"
+    ],
+    "module_apis": [
+      "bump_cron"
+    ],
+    "module_bes": [
+      "bump_cron_be"
+    ],
+    "module_routes": [
+      "cron"
+    ],
+    "multitenant_enabled": false,
+    "piper_library": "piper-library-os-acl",
+    "github_creds": "andrewlundesso",
+    "build_image": "alunde/mbtci:latest",
+    "deploy_landscape": "us10",
+    "cf_deploy_api": "https://api.cf.us10.hana.ondemand.com",
+    "cf_deploy_creds": "andrewlundesso",
+    "cf_deploy_org": "ConcileTime",
+    "cf_deploy_space": "dev",
+    "deploy_image": "ppiper/cf-cli:latest",
+    "deploy_params": "-f",
+    "slack_creds": "andrewlundeslack",
+    "slack_channel": "#jenkins_builds"
+  }
+}
