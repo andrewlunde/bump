@@ -1,5 +1,7 @@
 # bump Application
 
+Hey!
+
 Welcome to the bump project.
 
 It contains these folders and files, following the CAP recommended project layout:
