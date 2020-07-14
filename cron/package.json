@@ -7,6 +7,9 @@
     "passport": "^0.4.0",
     "stringify-object": "latest",
     "nodemon": "latest",
+    "axios": "latest",
+    "qs": "latest",
+    "crypto": "latest",
     "body-parser": "latest"
   },
   "description": "my description",
