@@ -72,6 +72,29 @@ app.get("/cron/links", function (req, res) {
 	res.status(200).send(responseStr);
 });
 
+const JobSchedulerClient = require('@sap/jobs-client');
+const scheduler = new JobSchedulerClient.Scheduler();
+
+app.get("/cron/get_all_jobs", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+		error: "none"
+	  };
+
+	scheduler.fetchAllJobs(req, function(err, result) {
+		if (err) {
+
+			responseJSON.error = 'Error retrieving jobs: %s' + err;
+			console.log('Error retrieving jobs: %s', err);
+			res.json(responseJSON);
+		}
+		else {
+			res.json(result);
+		}
+	});
+});
+
 app.get("/util/links", function (req, res) {
 
 	var responseStr = "";
@@ -95,6 +118,7 @@ app.get("/util/json", function (req, res) {
 	res.json(responseJSON);
 });
 
+
 app.get("/util/bump", async function (req, res) {
 
 	var responseStr = "";
@@ -108,6 +132,9 @@ app.get("/util/bump", async function (req, res) {
 	// Get the payload.json from the file system
 	// Compose the hash for X-Hub-Signature
 	// See https://developer.github.com/webhooks/securing/
+	//
+	// Code inspired by: https://www.robinwieruch.de/github-webhook-node-js
+	//
 	//
 	//Request URL: https://cicd-service.cfapps.us10.hana.ondemand.com/v1/github_events/account/6e3ca693-c112-4862-9c30-254a18b59a55
 	//Request method: POST

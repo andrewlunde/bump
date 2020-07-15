@@ -21,14 +21,14 @@ modules:
 
 ### New Modules Here ###
 
-# cf push bump-cron -p cron -n bump-cron -d cfapps.us10.hana.ondemand.com -k 512M -m 256M
+# cf push bump-cron -p cron -n conciletime-dev-bump-cron -d cfapps.us10.hana.ondemand.com -k 512M -m 512M
  - name: bump-cron
    type: nodejs
    path: cron
    build-parameters:
       ignore: ["node_modules/"]
    parameters:
-      memory: 256M
+      memory: 512M
       disk-quota: 512M
       #host: ${org}-${space}-bump-cron
       #domain: cfapps.us10.hana.ondemand.com
@@ -41,6 +41,7 @@ modules:
          url: ${default-url}
    requires:
     - name: bump-uaa
+    - name: bump-sch
 
 # cf push bump-app -p app -n bump-app -d cfapps.us10.hana.ondemand.com -k 256M -m 256M
  - name: bump-app
@@ -125,4 +126,15 @@ resources:
              - "http*://*.cfapps.us10.hana.ondemand.com/**"
 
 ### New Resources Here ###
+#com.sap.xs.auditlog auditlog standard
+ - name: bump-sch
+   type: org.cloudfoundry.managed-service
+   parameters:
+      service: jobscheduler
+      service-plan: lite
+      service-name: BUMP_SCH
+      config:
+         enable-xsuaa-support: true
+
+
 
