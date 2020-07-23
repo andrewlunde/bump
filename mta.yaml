@@ -35,6 +35,7 @@ modules:
    properties:
       # Find this by clicking "Webhook Data" in the "General Information" section of your job Secret:
       SECRET_TOKEN: '234ed9950a29c0aa969756550b73887938e0e25454b576d08af322deb73efddf'
+      NODE_DEBUG: 'scheduler'
    provides:
     - name: bump_cron
       properties:

@@ -9,6 +9,8 @@ var passport = require("passport");
 var stringifyObj = require("stringify-object");
 var bodyParser = require("body-parser");
 
+var async = require("async");
+
 const axios = require('axios');
 const qs = require('qs');
 var crypto = require('crypto');
@@ -62,6 +64,14 @@ app.get("/util", function (req, res) {
 	res.status(200).send(responseStr);
 });
 
+app.get("/util/date", function (req, res) {
+
+	var responseStr = "";
+	responseStr += new Date().toISOString();
+	res.set('Content-Type', 'text/plain');
+	res.status(200).send(responseStr);
+});
+
 app.get("/cron/links", function (req, res) {
 
 	var responseStr = "";
@@ -72,6 +82,8 @@ app.get("/cron/links", function (req, res) {
 	res.status(200).send(responseStr);
 });
 
+// https://www.npmjs.com/package/@sap/jobs-client
+
 const JobSchedulerClient = require('@sap/jobs-client');
 const scheduler = new JobSchedulerClient.Scheduler();
 
@@ -79,21 +91,131 @@ app.get("/cron/get_all_jobs", function (req, res) {
 
 	var responseJSON = {
 		message: "none",
-		error: "none"
-	  };
+	};
 
-	scheduler.fetchAllJobs(req, function(err, result) {
+	var jreq = {};
+	scheduler.fetchAllJobs(jreq, (err, result) => {
+	
 		if (err) {
-
-			responseJSON.error = 'Error retrieving jobs: %s' + err;
 			console.log('Error retrieving jobs: %s', err);
-			res.json(responseJSON);
+			responseJSON.message = err;
+			return res.json(responseJSON);
 		}
 		else {
-			res.json(result);
+			console.log('OK retrieving jobs: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
 		}
+		return null;
+	});
+
+});
+
+app.get("/cron/create_job", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var myJob = 
+	{
+	"name": "getUtilDate",
+	"description": "cron job that get the date",
+	"action": "https://" + req.hostname + "/util/date",
+	"active": true,
+	"httpMethod": "GET",
+	"schedules": [
+		{
+		"cron": "* * * * * 0 0",
+		"description": "this schedule runs once an hour on the hour",
+		"data": {
+			"salesOrderId": "1234"
+		},
+		"active": true,
+		"startTime": {
+			"date": "2020-07-22 00:00 +0000",
+			"format": "YYYY-MM-DD HH:mm Z"
+		}
+		}
+	]
+	};
+
+	var scJob = { job: myJob };
+
+	scheduler.createJob(scJob, (error, body) => {
+	
+		if (error) {
+			console.log('Error creating job: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK creating job: %s', body);
+			responseJSON = body;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/delete_job?jobId=123&active=false
+app.get("/cron/update_job", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var theJob = 
+	{
+		"active": req.query.active,
+	};
+
+	var suJob = { jobId: req.query.jobId, job: theJob };
+
+	scheduler.updateJob(suJob, (error, result) => {
+	
+		if (error) {
+			console.log('Error updating job: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK updating job: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/delete_job?jobId=123
+app.get("/cron/delete_job", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var jreq = {
+		jobId: req.query.jobId
+	};
+	scheduler.deleteJob(jreq, (err, result) => {
+	
+		if (err) {
+			console.log('Error deleting job: %s', err);
+			responseJSON.message = err;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK deleting job: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
 	});
 });
+
 
 app.get("/util/links", function (req, res) {
 
