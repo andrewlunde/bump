@@ -87,6 +87,7 @@ app.get("/cron/links", function (req, res) {
 const JobSchedulerClient = require('@sap/jobs-client');
 const scheduler = new JobSchedulerClient.Scheduler();
 
+// /cron/get_all_jobs
 app.get("/cron/get_all_jobs", function (req, res) {
 
 	var responseJSON = {
@@ -111,6 +112,9 @@ app.get("/cron/get_all_jobs", function (req, res) {
 
 });
 
+// Create Job Docs
+// https://help.sap.com/viewer/07b57c2f4b944bcd8470d024723a1631/Cloud/en-US/2c1ecb6dae0c42b4a850f7c07d1b7124.html
+// /cron/create_job
 app.get("/cron/create_job", function (req, res) {
 
 	var responseJSON = {
@@ -159,7 +163,33 @@ app.get("/cron/create_job", function (req, res) {
 
 });
 
-// /cron/delete_job?jobId=123&active=false
+// /cron/get_job?jobId=123
+app.get("/cron/update_job", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var suJob = { jobId: req.query.jobId };
+
+	scheduler.fetchJob(suJob, (error, result) => {
+	
+		if (error) {
+			console.log('Error fetching job: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK fetching job: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/update_job?jobId=123&active=false
 app.get("/cron/update_job", function (req, res) {
 
 	var responseJSON = {
@@ -214,6 +244,441 @@ app.get("/cron/delete_job", function (req, res) {
 		}
 		return null;
 	});
+});
+
+// Create Job Schedule Docs
+// https://help.sap.com/viewer/07b57c2f4b944bcd8470d024723a1631/Cloud/en-US/66ab3c1404e34a3b9f04b968ecb3fd5f.html
+// /cron/create_job_schedule?jobId=123&active=false
+app.get("/cron/create_job_schedule", function (req, res) {
+
+	var mySchedule = 
+	{
+		"repeatInterval": "2 hours",
+		"active": req.query.active,
+		"description": "New Schedule",
+		"startTime": "2020-07-01 00:00:00"
+	};
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var theJob = 
+	{
+		"active": req.query.active,
+	};
+
+	var scJobSched = { jobId: req.query.jobId, schedule: mySchedule };
+
+	scheduler.createJobSchedule(scJobSched, (error, result) => {
+	
+		if (error) {
+			console.log('Error creating job schedule: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK creating job schedule: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/update_job_schedule?jobId=123&scheduleId=ABC-DEF&active=false
+app.get("/cron/update_job_schedule", function (req, res) {
+
+	var theSchedule = 
+	{
+		"active": req.query.active,
+		"cron": "* * * * 4"
+	};
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var suJobSched = { jobId: req.query.jobId, scheduleId: req.query.scheduleId, schedule: theSchedule };
+
+	scheduler.updateJobSchedule(suJobSched, (error, result) => {
+	
+		if (error) {
+			console.log('Error updating job schedule: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK updating job schedule: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/delete_job_schedule?jobId=123&scheduleId=ABC-DEF
+app.get("/cron/delete_job_schedule", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sdJobSched = { jobId: req.query.jobId, scheduleId: req.query.scheduleId };
+
+	scheduler.deleteJobSchedule(sdJobSched, (error, result) => {
+	
+		if (error) {
+			console.log('Error deleting job schedule: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK deleting job schedule: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/fetch_job_schedule?jobId=123&scheduleId=ABC-DEF
+app.get("/cron/fetch_job_schedule", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sfJobSched = { jobId: req.query.jobId, scheduleId: req.query.scheduleId };
+
+	scheduler.fetchJobSchedule(sfJobSched, (error, result) => {
+	
+		if (error) {
+			console.log('Error fetching job schedule: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK fetching job schedule: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/fetch_job_schedules?jobId=123
+app.get("/cron/fetch_job_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sfJobScheds = { jobId: req.query.jobId };
+
+	scheduler.fetchJobSchedule(sfJobScheds, (error, result) => {
+	
+		if (error) {
+			console.log('Error fetching job schedules: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK fetching job schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/get_run_logs?jobId=123&scheduleId=ABC-DEF
+app.get("/cron/get_run_logs", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sgRunLogs = { 
+		jobId: req.query.jobId, 
+		scheduleId: req.query.scheduleId,
+		page_size: 15,
+		offset: 0 
+	};
+
+	scheduler.getRunLogs(sgRunLogs, (error, result) => {
+	
+		if (error) {
+			console.log('Error getting run logs: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK getting run logs: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/update_run_log?jobId=123&scheduleId=ABC-DEF&runId=1&success=true&message=OK%20finished
+app.get("/cron/update_run_log", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var suRunLog = { 
+		jobId: req.query.jobId, 
+		scheduleId: req.query.scheduleId,
+		runId: req.query.runId,
+		data: { success: req.query.success, message: req.query.message }
+	};
+
+	scheduler.updateRunLog(suRunLog, (error, result) => {
+	
+		if (error) {
+			console.log('Error update run log: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK update run log: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/delete_all_job_schedules?jobId=123
+app.get("/cron/delete_all_job_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sdaJobScheds = { jobId: req.query.jobId };
+
+	scheduler.deleteAllJobSchedules(sdaJobScheds, (error, result) => {
+	
+		if (error) {
+			console.log('Error deleting all job schedules: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK deleting all job schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/activate_all_job_schedules?jobId=123
+app.get("/cron/activate_all_job_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sActivateAllScheds = { jobId: req.query.jobId };
+
+	scheduler.activateAllSchedules(sActivateAllScheds, (error, result) => {
+	
+		if (error) {
+			console.log('Error deleting all job schedules: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK deleting all job schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/deactivate_all_job_schedules?jobId=123
+app.get("/cron/deactivate_all_job_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sDectivateAllScheds = { jobId: req.query.jobId };
+
+	scheduler.deactivateAllSchedules(sDectivateAllScheds, (error, result) => {
+	
+		if (error) {
+			console.log('Error deleting all job schedules: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK deleting all job schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/get_job_action_logs?jobId=123
+app.get("/cron/get_job_action_logs", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sgAllJobActionLogs = { jobId: req.query.jobId };
+
+	scheduler.getJobActionLogs(sgAllJobActionLogs, (error, result) => {
+	
+		if (error) {
+			console.log('Error getting all job action logs: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK getting all job action logs: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/get_schedule_action_logs?jobId=123&scheduleId=ABC-DEF
+app.get("/cron/get_schedule_action_logs", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sgSchedActionLogs = { jobId: req.query.jobId, scheduleId: req.query.scheduleId };
+
+	scheduler.getScheduleActionLogs(sgSchedActionLogs, (error, result) => {
+	
+		if (error) {
+			console.log('Error getting schedule action logs: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK getting schedule action logs: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/get_job_count?active_status=true
+app.get("/cron/get_job_count", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var jreq = {
+		activeStatus: req.query.active_status // true- for getting active number of jobs and false- for getting inactive number of jobs
+	};
+	scheduler.getJobCount(jreq, (err, result) => {
+	
+		if (err) {
+			console.log('Error getting job count: %s', err);
+			responseJSON.message = err;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK getting job count: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+//Search API (need more detail)
+//Search can be done in both job and schedule entities. Here in the client 'q' contains the query parameter, you need to provide the query in decoded format, the client will decode the query. And filtering parameters can be provided as shown below:
+
+// /cron/search_jobs?active=true
+app.get("/cron/search_jobs", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var searchToken = {
+		q : 'job startTime:>2020-07-01 active:' + req.query.active,
+		displaySchedules : 'false',
+		offset : 0,
+		page_size : 5
+	};
+
+	scheduler.searchJobs(searchToken, (err, result) => {
+	
+		if (err) {
+			console.log('Error searching jobs: %s', err);
+			responseJSON.message = err;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK searching jobs: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// /cron/search_schedules?active=true
+app.get("/cron/search_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var searchSchedToken = {
+		q : 'startTime:>2020-07-01 active:' + req.query.active,
+		displaySchedules : 'false',
+		offset : 0,
+		page_size : 5
+	};
+
+	scheduler.searchSchedules(searchSchedToken, (err, result) => {
+	
+		if (err) {
+			console.log('Error searching schedules: %s', err);
+			responseJSON.message = err;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK searching schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
 });
 
 
