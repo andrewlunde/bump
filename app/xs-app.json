@@ -15,7 +15,7 @@
       "source": "(cron/)(.*)",
       "destination": "bump_cron_be",
       "csrfProtection": true,
-      "authenticationType": "xsuaa"
+      "authenticationType": "none"
     },
     {
       "localDir": "resources",

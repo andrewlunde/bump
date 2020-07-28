@@ -12,6 +12,12 @@ var bodyParser = require("body-parser");
 var async = require("async");
 
 const axios = require('axios');
+
+xsenv.loadEnv();	// Required for local testing with a default-env.json file
+
+const JobSchedulerClient = require('@sap/jobs-client');
+const scheduler = new JobSchedulerClient.Scheduler();
+
 const qs = require('qs');
 var crypto = require('crypto');
 
@@ -23,11 +29,13 @@ var port = process.env.PORT || 3000;
 
 var myLogger = function (req, res, next) {
   console.log('LOGGED');
-  console.log("==== method: " + req.method + " + " + req.url);
-  console.log("==== headers:" + JSON.stringify(req.headers) + "====");
-  console.log("==== body:" + JSON.stringify(req.body) + "====");
+  console.log("==== method: " + req.method + " + " + req.url + "\n=== method");
+  console.log("==== headers:\n" + JSON.stringify(req.headers,null,2) + "\n=== headers");
+  console.log("==== body:\n" + JSON.stringify(req.body) + "\n==== body\n");
   next();
 }
+
+app.use(myLogger);
 
 app.use(bodyParser.json());
 
@@ -47,7 +55,6 @@ app.get("/cron", function (req, res) {
 	var responseStr = "";
 	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
 	responseStr += "<a href=\"/cron/links\">The Links page.</a><br />";
-	responseStr += "<a href=\"/util/links\">Util Links page.</a><br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 	res.status(200).send(responseStr);
@@ -57,7 +64,6 @@ app.get("/util", function (req, res) {
 
 	var responseStr = "";
 	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
-	responseStr += "<a href=\"/cron/links\">The Links page.</a><br />";
 	responseStr += "<a href=\"/util/links\">Util Links page.</a><br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
@@ -76,16 +82,27 @@ app.get("/cron/links", function (req, res) {
 
 	var responseStr = "";
 	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
-	responseStr += "<a href=\"/cron/links\">Back to Links page.</a><br />";
+	responseStr += "<a href=\"/cron/get_all_jobs\" target=\"all_jobs\">get_all_jobs</a><br />";
+	responseStr += "<a href=\"/cron/fetch_job?jobId=123\" target=\"jobs\">fetch_job?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/create_job?name=getUtilDate\" target=\"jobs\">create_job?name=getUtilDate</a> name must be unique<br />";
+	responseStr += "<a href=\"/cron/update_job?jobId=123&active=false\" target=\"jobs\">update_job?jobId=123&active=false</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/delete_job?jobId=123\" target=\"jobs\">delete_job?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/cron/fetch_job_schedules?jobId=123\" target=\"all_sched\">fetch_job_schedules?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/fetch_job_schedule?jobId=123&scheduleId=ABC-DEF\" target=\"jobsched\">fetch_job_schedule?jobId=123&scheduleId=ABC-DEF</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "<a href=\"/cron/create_job_schedule?jobId=123&active=false\" target=\"sched\">create_job_schedule?jobId=123&active=false</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/update_job_schedule?jobId=123&scheduleId=ABC-DEF&active=false\" target=\"jobsched\">update_job_schedule?jobId=123&scheduleId=ABC-DEF&active=false</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "<a href=\"/cron/delete_job_schedule?jobId=123&scheduleId=ABC-DEF\" target=\"jobsched\">delete_job_schedule?jobId=123&scheduleId=ABC-DEF</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/cron/get_run_logs?jobId=123&scheduleId=ABC-DEF\" target=\"jobrunsched\">get_run_logs?jobId=123&scheduleId=ABC-DEF</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "<a href=\"/cron/update_job_run_log?jobId=123&scheduleId=ABC-DEF&message=OK%20finished\" target=\"jobrunlog\">update_job_run_log?jobId=123&scheduleId=ABC-DEF&message=OK%20finished</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "------<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 	res.status(200).send(responseStr);
 });
 
 // https://www.npmjs.com/package/@sap/jobs-client
-
-const JobSchedulerClient = require('@sap/jobs-client');
-const scheduler = new JobSchedulerClient.Scheduler();
 
 // /cron/get_all_jobs
 app.get("/cron/get_all_jobs", function (req, res) {
@@ -114,7 +131,7 @@ app.get("/cron/get_all_jobs", function (req, res) {
 
 // Create Job Docs
 // https://help.sap.com/viewer/07b57c2f4b944bcd8470d024723a1631/Cloud/en-US/2c1ecb6dae0c42b4a850f7c07d1b7124.html
-// /cron/create_job
+// /cron/create_job?name=getUtilDate
 app.get("/cron/create_job", function (req, res) {
 
 	var responseJSON = {
@@ -123,9 +140,12 @@ app.get("/cron/create_job", function (req, res) {
 
 	var myJob = 
 	{
-	"name": "getUtilDate",
-	"description": "cron job that get the date",
-	"action": "https://" + req.hostname + "/util/date",
+	"name": req.query.name,
+	"description": "cron job named " + req.query.name,
+	//"action": "https://" + req.hostname + "/util/date",
+	//"action": "http://" + "localhost" + ":" + "8001" + "/util/date",
+	"action": "https://" + "conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com" + "/util/date",
+	
 	"active": true,
 	"httpMethod": "GET",
 	"schedules": [
@@ -163,8 +183,8 @@ app.get("/cron/create_job", function (req, res) {
 
 });
 
-// /cron/get_job?jobId=123
-app.get("/cron/update_job", function (req, res) {
+// /cron/fetch_job?jobId=123
+app.get("/cron/fetch_job", function (req, res) {
 
 	var responseJSON = {
 		message: "none",
@@ -253,10 +273,10 @@ app.get("/cron/create_job_schedule", function (req, res) {
 
 	var mySchedule = 
 	{
-		"repeatInterval": "2 hours",
+		"repeatInterval": "1 hour",
 		"active": req.query.active,
-		"description": "New Schedule",
-		"startTime": "2020-07-01 00:00:00"
+		"description": "New Schedule 1 hour",
+		"startTime": "2020-07-28 23:59:00"
 	};
 
 	var responseJSON = {
@@ -287,13 +307,13 @@ app.get("/cron/create_job_schedule", function (req, res) {
 
 });
 
+// https://help.sap.com/viewer/07b57c2f4b944bcd8470d024723a1631/Cloud/en-US/0a4d9395180f482db46b8a5375fa6f7f.html
 // /cron/update_job_schedule?jobId=123&scheduleId=ABC-DEF&active=false
 app.get("/cron/update_job_schedule", function (req, res) {
 
 	var theSchedule = 
 	{
-		"active": req.query.active,
-		"cron": "* * * * 4"
+		"active": req.query.active
 	};
 
 	var responseJSON = {
@@ -345,6 +365,32 @@ app.get("/cron/delete_job_schedule", function (req, res) {
 
 });
 
+// /cron/fetch_job_schedules?jobId=123
+app.get("/cron/fetch_job_schedules", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+
+	var sfJobScheds = { jobId: req.query.jobId };
+
+	scheduler.fetchJobSchedules(sfJobScheds, (error, result) => {
+	
+		if (error) {
+			console.log('Error fetching job schedules: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK fetching job schedules: %s', result);
+			responseJSON = result;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
 // /cron/fetch_job_schedule?jobId=123&scheduleId=ABC-DEF
 app.get("/cron/fetch_job_schedule", function (req, res) {
 
@@ -352,7 +398,7 @@ app.get("/cron/fetch_job_schedule", function (req, res) {
 		message: "none",
 	};
 
-	var sfJobSched = { jobId: req.query.jobId, scheduleId: req.query.scheduleId };
+	var sfJobSched = { jobId: req.query.jobId, scheduleId: req.query.scheduleId, displayLogs: true };
 
 	scheduler.fetchJobSchedule(sfJobSched, (error, result) => {
 	
@@ -363,32 +409,6 @@ app.get("/cron/fetch_job_schedule", function (req, res) {
 		}
 		else {
 			console.log('OK fetching job schedule: %s', result);
-			responseJSON = result;
-			return res.json(responseJSON);
-		}
-		return null;
-	});
-
-});
-
-// /cron/fetch_job_schedules?jobId=123
-app.get("/cron/fetch_job_schedules", function (req, res) {
-
-	var responseJSON = {
-		message: "none",
-	};
-
-	var sfJobScheds = { jobId: req.query.jobId };
-
-	scheduler.fetchJobSchedule(sfJobScheds, (error, result) => {
-	
-		if (error) {
-			console.log('Error fetching job schedules: %s', error);
-			responseJSON.message = error;
-			return res.json(responseJSON);
-		}
-		else {
-			console.log('OK fetching job schedules: %s', result);
 			responseJSON = result;
 			return res.json(responseJSON);
 		}
@@ -428,21 +448,24 @@ app.get("/cron/get_run_logs", function (req, res) {
 
 });
 
-// /cron/update_run_log?jobId=123&scheduleId=ABC-DEF&runId=1&success=true&message=OK%20finished
-app.get("/cron/update_run_log", function (req, res) {
+// /cron/update_job_run_log?jobId=123&scheduleId=ABC-DEF&runId=XYZ-1234&success=true&message=OK%20finished
+app.get("/cron/update_job_run_log", function (req, res) {
 
 	var responseJSON = {
 		message: "none",
 	};
 
+	// var data = { success: req.query.success, message: '"' + "YO" + '"' };
+	var data = { success: false, message: "YO" };
+
 	var suRunLog = { 
 		jobId: req.query.jobId, 
 		scheduleId: req.query.scheduleId,
 		runId: req.query.runId,
-		data: { success: req.query.success, message: req.query.message }
+		data: data
 	};
 
-	scheduler.updateRunLog(suRunLog, (error, result) => {
+	scheduler.updateJobRunLog(suRunLog, (error, result) => {
 	
 		if (error) {
 			console.log('Error update run log: %s', error);
@@ -870,7 +893,6 @@ app.post("/util/bump", function(req, res) {
 	res.status(200).send(retVal);
 });
 
-app.use(myLogger);
 
 server.on("request", app);
 

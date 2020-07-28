@@ -1,0 +1,74 @@
+
+<html>
+    <head>
+    
+    <script>
+    
+    
+    function randomIntFromInterval(min,max)
+    {
+        return Math.floor(Math.random()*(max-min+1)+min);
+    }
+    var request_output = "";
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'sensors.xsodata/temp');
+    request_output += "POST to sensors.xsodata/temp \n";
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    request_output += "Request Header: Content-Type = application/json \n";
+    xhr.setRequestHeader('Accept', 'application/json');
+    request_output += "Request Header: Accept = application/json \n";
+    
+    request_output += "\n";
+    request_output += "Request Body: \n";
+    
+    function dumpResponseHeaders(xhr_obj) {
+        var hdr_out = "";
+        hdr_out += "Response Headers\n";
+        hdr_out += "\n";
+        var headers = xhr_obj.getAllResponseHeaders();
+        return (hdr_out + headers + "\n");
+    }
+    xhr.onload = function() {
+        if (xhr.status === 201) {
+            document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+        }
+        else {
+            alert("Yipe!  Got status " + xhr.status + " : " + xhr.statusText + " ::\n " + JSON.parse(xhr.responseText).error.message.value + " \n:: expected 201.");
+        }
+    };
+    
+    var request_obj = 
+    {
+       "tempId": 0,
+        "tempVal": randomIntFromInterval(70,110),
+         "ts": "/Date(" + (new Date()).getTime() +  ")/",
+         "created": "/Date(1234567890123)/"
+    };
+    
+    </script>
+    
+    </head>
+    <body>
+    <p>===Begin Request===</p>
+    <div id="request_content">
+    No request sent yet.    
+    </div>
+    <p>===End Request===</p>
+    <p>===Begin Response===</p>
+    <div id="response_content">
+    No results returned yet.    
+    </div>
+    <p>===End Response===</p>
+    
+    <script>
+    // Display the request
+    document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
+    
+    // Send the Ajax Request.
+    xhr.send(JSON.stringify(request_obj));
+    </script>
+    
+    </body>
+    </html>
+    

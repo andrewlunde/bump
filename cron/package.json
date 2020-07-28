@@ -38,7 +38,7 @@
   "scripts": {
     "normalstart": "nodemon server.js",
     "debugstart": "node --inspect server.js",
-    "start": "node --inspect server.js"
+    "start": "nodemon server.js"
   },
   "version": "1.0.0"
 }
