@@ -42,9 +42,10 @@ app.use(bodyParser.json());
 app.get("/", function (req, res) {
 
 	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
 	responseStr += "<a href=\"/cron/links\">The Links page.</a><br />";
 	responseStr += "<a href=\"/util/links\">Util Links page.</a><br />";
+	responseStr += "------<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 	res.status(200).send(responseStr);
@@ -53,35 +54,21 @@ app.get("/", function (req, res) {
 app.get("/cron", function (req, res) {
 
 	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
-	responseStr += "<a href=\"/cron/links\">The Links page.</a><br />";
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
+	responseStr += "<a href=\"/cron/links\">Cron Links page.</a><br />";
+	responseStr += "------<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
-	res.status(200).send(responseStr);
-});
-
-app.get("/util", function (req, res) {
-
-	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
-	responseStr += "<a href=\"/util/links\">Util Links page.</a><br />";
-	responseStr += "<a href=\"/\">Return to home page.</a><br />";
-	responseStr += "</body></html>";
-	res.status(200).send(responseStr);
-});
-
-app.get("/util/date", function (req, res) {
-
-	var responseStr = "";
-	responseStr += new Date().toISOString();
-	res.set('Content-Type', 'text/plain');
 	res.status(200).send(responseStr);
 });
 
 app.get("/cron/links", function (req, res) {
 
 	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
+	
+	responseStr += "<a href=\"https://help.sap.com/viewer/07b57c2f4b944bcd8470d024723a1631/Cloud/en-US/22c2df4d22cb4a05af4c9502a67597ae.html\" target=\"docs\">SAP Cloud Platform Job Scheduler Documentation</a><br />";
+	responseStr += "<br />";
 	responseStr += "<a href=\"/cron/get_all_jobs\" target=\"all_jobs\">get_all_jobs</a><br />";
 	responseStr += "<a href=\"/cron/fetch_job?jobId=123\" target=\"jobs\">fetch_job?jobId=123</a> use jobId from get_all_jobs<br />";
 	responseStr += "<a href=\"/cron/create_job?name=getUtilDate\" target=\"jobs\">create_job?name=getUtilDate</a> name must be unique<br />";
@@ -97,10 +84,33 @@ app.get("/cron/links", function (req, res) {
 	responseStr += "<a href=\"/cron/get_run_logs?jobId=123&scheduleId=ABC-DEF\" target=\"jobrunsched\">get_run_logs?jobId=123&scheduleId=ABC-DEF</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
 	responseStr += "<a href=\"/cron/update_job_run_log?jobId=123&scheduleId=ABC-DEF&message=OK%20finished\" target=\"jobrunlog\">update_job_run_log?jobId=123&scheduleId=ABC-DEF&message=OK%20finished</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
 	responseStr += "------<br />";
+	responseStr += "<a href=\"/cron/delete_all_job_schedules?jobId=123\" target=\"jobrunlog\">delete_all_job_schedules?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/activate_all_job_schedules?jobId=123\" target=\"jobrunlog\">activate_all_job_schedules?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/deactivate_all_job_schedules?jobId=123\" target=\"jobrunlog\">deactivate_all_job_schedules?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/get_job_action_logs?jobId=123\" target=\"jobrunlog\">get_job_action_logs?jobId=123</a> use jobId from get_all_jobs<br />";
+	responseStr += "<a href=\"/cron/get_schedule_action_logs?jobId=123&scheduleId=ABC-DEF\" target=\"jobrunsched\">get_schedule_action_logs?jobId=123&scheduleId=ABC-DEF</a> use jobId from get_all_jobs and scheduleId from fetch_job_schedules<br />";
+	responseStr += "<a href=\"/cron/get_job_count?active=true\" target=\"sched\">get_job_count?active=true</a> active=true or false<br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/cron/search_jobs?active=true\" target=\"search\">search_jobs?active=true</a> active=true or false<br />";
+	responseStr += "<a href=\"/cron/search_schedules?active=true\" target=\"search\">search_schedules?active=true</a> active=true or false : CF not supported<br />";
+	responseStr += "------<br />";
+
+	const cicdui = process.env.CICD_UI;
+
+	responseStr += "<a href=\"/cron/date_in_1_min?name=BuildAt\" target=\"dateat\">date_in_1_min?name=BuildAt</a> Get Date in 1 minute. Monitor with: <strong>cf logs bump-cron</strong><br />";
+	responseStr += "<a href=\"/cron/build_in_1_min?name=BuildAt\" target=\"buildat\">build_in_1_min?name=BuildAt</a> Trigger build in 1 minute. ";
+	responseStr += "Monitor with: <a href=\"" + cicdui + "\" target=\"dashboard\">" + cicdui + "</a><br />";
+
+	responseStr += "------<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 	res.status(200).send(responseStr);
 });
+
+// =============================================================================================
+// ====================================== Cron Functions =======================================
+// ================================== Authorization Required ===================================
+// =============================================================================================
 
 // https://www.npmjs.com/package/@sap/jobs-client
 
@@ -143,7 +153,7 @@ app.get("/cron/create_job", function (req, res) {
 	"name": req.query.name,
 	"description": "cron job named " + req.query.name,
 	//"action": "https://" + req.hostname + "/util/date",
-	//"action": "http://" + "localhost" + ":" + "8001" + "/util/date",
+	//"action": "http://" + "localhost" + ":" + "8001" + "/util/date",	// Doesn't work when testing locally against CF
 	"action": "https://" + "conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com" + "/util/date",
 	
 	"active": true,
@@ -650,8 +660,8 @@ app.get("/cron/search_jobs", function (req, res) {
 	};
 
 	var searchToken = {
-		q : 'job startTime:>2020-07-01 active:' + req.query.active,
-		displaySchedules : 'false',
+		q : 'active:' + req.query.active,
+		displaySchedules : 'true',
 		offset : 0,
 		page_size : 5
 	};
@@ -673,6 +683,7 @@ app.get("/cron/search_jobs", function (req, res) {
 
 });
 
+// This call not supported on Cloud Foundry service=jobscheduler plan=lite
 // /cron/search_schedules?active=true
 app.get("/cron/search_schedules", function (req, res) {
 
@@ -681,8 +692,8 @@ app.get("/cron/search_schedules", function (req, res) {
 	};
 
 	var searchSchedToken = {
-		q : 'startTime:>2020-07-01 active:' + req.query.active,
-		displaySchedules : 'false',
+		q : 'active:' + req.query.active,
+		displaySchedules : 'true',
 		offset : 0,
 		page_size : 5
 	};
@@ -704,13 +715,121 @@ app.get("/cron/search_schedules", function (req, res) {
 
 });
 
+// /cron/build_in_1_min?name=BuildAt
+app.get("/cron/build_in_1_min", function (req, res) {
+
+	var responseJSON = {
+		message: "none",
+	};
+    var buildDate = nowPlus1();
+	var myJob = 
+	{
+	"name": req.query.name + "_" + buildDate.getHours() + "_" + buildDate.getMinutes(),
+	"description": "cron job created by build_in_1_min",
+	//"action": "https://" + req.hostname + "/util/date",
+	//"action": "http://" + "localhost" + ":" + "8001" + "/util/date",	// Doesn't work when testing locally against CF
+	"action": "https://" + "conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com" + "/util/bump",
+	
+	"active": true,
+	"httpMethod": "GET",
+	"startTime": buildDate.toISOString(),
+	"schedules": [
+		{
+			"active": true,
+			"time": buildDate.toISOString()
+		}
+	]
+	};
+
+	var scJob = { job: myJob };
+
+	scheduler.createJob(scJob, (error, body) => {
+	
+		if (error) {
+			console.log('Error creating job: %s', error);
+			responseJSON.message = error;
+			return res.json(responseJSON);
+		}
+		else {
+			console.log('OK creating job: %s', body);
+			responseJSON = body;
+			return res.json(responseJSON);
+		}
+		return null;
+	});
+
+});
+
+// =============================================================================================
+// ===================================== Utility Functions =====================================
+// ================================ no Authorization Required ==================================
+// =============================================================================================
+
+app.get("/util", function (req, res) {
+
+	var responseStr = "";
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
+	responseStr += "<a href=\"/util/links\">Util Links page.</a><br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/\">Return to home page.</a><br />";
+	responseStr += "</body></html>";
+	res.status(200).send(responseStr);
+});
+
+app.get("/util/date", function (req, res) {
+
+	var responseStr = "";
+	responseStr += new Date().toISOString();
+	res.set('Content-Type', 'text/plain');
+	res.status(200).send(responseStr);
+});
+
+function nowPlus1() {
+	var dateStr = "";
+	var now = new Date();
+	var soon = new Date(now.getTime() + (1 * 60000));
+	dateStr += soon.toISOString();
+	// return(dateStr);
+	// Example 2020-07-29T19:14:05.991Z
+	return(soon);
+};
+
+app.get("/util/now_plus_2", function (req, res) {
+
+	var responseStr = "";
+	responseStr += nowPlus1().toISOString();
+	res.set('Content-Type', 'text/plain');
+	res.status(200).send(responseStr);
+});
 
 app.get("/util/links", function (req, res) {
 
 	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>SUCCESS!</h2><br />";
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
+	responseStr += "<a href=\"/util/cicdui\">CI/CD User Interface.</a><br />";
 	responseStr += "<a href=\"/util/bump\">Trigger a Jenkins Build Job.</a><br />";
-	responseStr += "<a href=\"/util/links\">Back to Util Links page.</a><br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/util/date\">Test trigger target: server data as text.</a><br />";
+	responseStr += "------<br />";
+	responseStr += "<a href=\"/\">Return to home page.</a><br />";
+	responseStr += "</body></html>";
+	res.status(200).send(responseStr);
+});
+
+app.get("/util/cicdui", function (req, res) {
+
+	var responseStr = "";
+	const cicdui = process.env.CICD_UI;
+	const webhook = process.env.WEBHOOK_URL;
+	const secret = process.env.SECRET_TOKEN;
+
+	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>bump-cron</h1><br />";
+	responseStr += "Dashboard: <a href=\"" + cicdui + "\" target=\"dashboard\">" + cicdui + "</a><br />";
+	responseStr += "Webhook: <a href=\"" + webhook + "\" target=\"webhook\">" + webhook + "</a><br />";
+	responseStr += "Secret: " + secret + "<br />";
+	responseStr += "<br />";
+	responseStr += "<a href=\"/util/bump\" target=\"bump\">Trigger a Jenkins Build Job.</a><br />";
+	responseStr += "<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 	res.status(200).send(responseStr);
@@ -732,9 +851,10 @@ app.get("/util/json", function (req, res) {
 app.get("/util/bump", async function (req, res) {
 
 	var responseStr = "";
-	responseStr += "<!DOCTYPE HTML><html><head><title>BUMP</title></head><body><h1>bump-cron</h1><h2>GET WHAT!</h2><br />";
+	responseStr += "<!DOCTYPE HTML><html><head><title>util/bump</title></head><body style=\"font-family: Tahoma, Geneva, sans-serif\"><h1>util/bump</h1><br />";
 	responseStr += "You need to POST to this URL!<br />";
 	responseStr += "<a href=\"/util/links\">Back to Util Links page.</a><br />";
+	responseStr += "------<br />";
 	responseStr += "<a href=\"/\">Return to home page.</a><br />";
 	responseStr += "</body></html>";
 
@@ -755,7 +875,28 @@ app.get("/util/bump", async function (req, res) {
 	//X-GitHub-Event: push
 	//X-Hub-Signature: sha1=cefbcfcb1949d172a51565d32329974732c8add3
 
+	//Specify the module properties in your mta.yaml file
+	//properties:
+	//  # Find this by clicking "Webhook Data" in the "General Information" section of your job Secret:
+	//  SECRET_TOKEN: '234ed9950a29c0aa969756550b73887938e0e25454b576d08af322deb73efddf'
+	//  WEBHOOK_URL: 'https://cicd-service.cfapps.us10.hana.ondemand.com/v1/github_events/account/6e3ca693-c112-4862-9c30-254a18b59a55',
+	//  NODE_DEBUG: 'scheduler'
+
+	//When testing locally, add it to your default-env.json file
+	//{
+	//	"PORT": 8001,
+	//	"SECRET_TOKEN": "234ed9950a29c0aa969756550b73887938e0e25454b576d08af322deb73efddf",
+	//	"WEBHOOK_URL": "https://cicd-service.cfapps.us10.hana.ondemand.com/v1/github_events/account/6e3ca693-c112-4862-9c30-254a18b59a55",
+	//	"VCAP_SERVICES": {
+	//	 "jobscheduler": [ ... ]
+	//	 ...
+	//	 }
+	//}
+
+	const cicdui = process.env.CICD_UI;
 	const secret = process.env.SECRET_TOKEN;
+	const webhook = process.env.WEBHOOK_URL;
+
 	const payload = require("./payload");
 
 	responseStr += "secret: " + secret + ".<br />";
@@ -769,8 +910,10 @@ app.get("/util/bump", async function (req, res) {
       };
 
     var config = {
-        method: 'get',
-        url: 'https://conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com/util/json',
+		method: 'get',
+		//url: 'https://' + req.hostname + '/util/json',
+		// Hardcoded for localized testing against CF
+        url: 'https://' + 'conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com' + '/util/json',
 		headers: { 'User-Agent': 'Console app' }
     };
 
@@ -782,8 +925,14 @@ app.get("/util/bump", async function (req, res) {
 		responseStr += "title: " + response.data.title + "<br />";
 
 		config.method = 'post';
-		//config.url = 'https://conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com/util/bump';
-		config.url = 'https://cicd-service.cfapps.us10.hana.ondemand.com/v1/github_events/account/6e3ca693-c112-4862-9c30-254a18b59a55';
+		//Endpoint defined in this app for localized testing
+		//config.url = 'https://conciletime-dev-bump-app.cfapps.us10.hana.ondemand.com/util/bump'
+
+		//Hardcoded CI/CD service endpoint
+		//'https://cicd-service.cfapps.us10.hana.ondemand.com/v1/github_events/account/6e3ca693-c112-4862-9c30-254a18b59a55'
+
+		//Defined in the environment variable WEBHOOK_URL
+		config.url = webhook;
 	
 	// 	post '/payload' do
 	// 	request.body.rewind
@@ -853,6 +1002,9 @@ app.get("/util/bump", async function (req, res) {
 	}
 
 	responseStr += "POST: " + "FINISHED" + ".<br />";
+
+	responseStr += "Check the Dashboard for an active build: <a href=\"" + cicdui + "\" target=\"dashboard\">" + cicdui + "</a><br />";
+
 
 	res.status(200).send(responseStr);
 
